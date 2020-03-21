@@ -37,18 +37,20 @@ class Register extends Component {
          required:(field) => `${field} is required`,
          'password.confirmed':'the passwords do not match',
          'password.min':'password is too short'
-  }
+   }
 
 
      try {
-        // back end
+        // fron end
         await validateAll(data,rules,message)
 
-        const response = await Axios.post('',{
+
+        // back end
+        const response = await Axios.post('https://github.com/aframson/Church-forum-brich-gahana/',{
                fname:data.firstname,
                lname:data.lname,
                uname:data.uname,
-               password:data.passowrd,
+               password:data.password,
                tele:data.phone
         })
   
@@ -57,7 +59,7 @@ class Register extends Component {
         })
 
      } catch (error) {
-           console.log(error)
+           console.log('---------',error)
 
            const formattedError = {};
 
@@ -122,9 +124,9 @@ class Register extends Component {
 
        <Hoshi 
       label="Password" 
-      value={this.state.passowrd} 
+      value={this.state.password} 
       secureTextEntry
-      onChangeText={passowrd => this.setState({passowrd})} 
+      onChangeText={password => this.setState({password})} 
       backgroundColor={"#fff"}
       borderColor={"#b76c94"}
       borderHeight={3}
@@ -167,6 +169,12 @@ const styles = StyleSheet.create({
   container: {
      padding:10
   },
+  error:{
+    color:'red',
+    padding:5,
+    fontSize:10
+
+  }
 });
 
 
