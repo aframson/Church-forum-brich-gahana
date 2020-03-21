@@ -2,17 +2,19 @@ import React , {Component} from 'react';
 import {validateAll} from 'indicative/validator';
 import { StyleSheet, Text, View, TextInput,Button } from 'react-native';
 import {Hoshi} from 'react-native-textinput-effects';
-// import Axios from 'axios';
+import Axios from  'axios';
 class Register extends Component {
 
 
   state = {
-    fname:'',
+    firstname:'',
     lname:'',
     uname:'',
     password:'',
     cpassword:'',
-    phone:''
+    phone:'',
+    userData:'',
+    errors:{}
   }
 
 
@@ -23,7 +25,7 @@ class Register extends Component {
 
     const rules  ={
 
-          fname:'required|string',
+          firstname:'required|string',
           lname:'required|string',
           uname:'required|string',
           password:'required|string|min:6|confirmed',
@@ -39,14 +41,32 @@ class Register extends Component {
 
 
      try {
-      
+        // back end
         await validateAll(data,rules,message)
 
-
-
+        const response = await Axios.post('',{
+               fname:data.firstname,
+               lname:data.lname,
+               uname:data.uname,
+               password:data.passowrd,
+               tele:data.phone
+        })
+  
+        this.setState({
+             userData:response
+        })
 
      } catch (error) {
-       
+           console.log(error)
+
+           const formattedError = {};
+
+           error.forEach(errors => formattedError[errors.field] = errors.message);
+
+
+           this.setState({
+              errors:formattedError
+           })
      }
 
 
@@ -63,20 +83,21 @@ class Register extends Component {
 
 
   render(){
-
+   console.log('??????????',this.state.errors)
   return (
     <View style={styles.container}>
       <Text>Refister</Text>
 
       <Hoshi 
       label="First name" 
-      value={this.state.fname} 
-      onChangeText={fname => this.setState({fname})} 
+      value={this.state.firstname} 
+      onChangeText={firstname => this.setState({firstname})} 
       backgroundColor={"#fff"}
       borderColor={"#b76c94"}
       borderHeight={3}
       inputPadding={16}
       />
+      <Text style={styles.error}>{this.state.errors['firstname']}</Text>
        <Hoshi 
       label="Last Name" 
       value={this.state.lname} 
@@ -86,6 +107,8 @@ class Register extends Component {
       borderHeight={3}
       inputPadding={16}
       />
+      <Text style={styles.error}>{this.state.errors['lname']}</Text>
+
        <Hoshi 
       label="User Name" 
       value={this.state.uname} 
@@ -95,6 +118,8 @@ class Register extends Component {
       borderHeight={3}
       inputPadding={16}
       />
+      <Text style={styles.error}>{this.state.errors['uname']}</Text>
+
        <Hoshi 
       label="Password" 
       value={this.state.passowrd} 
@@ -105,6 +130,8 @@ class Register extends Component {
       borderHeight={3}
       inputPadding={16}
       />
+      <Text style={styles.error}>{this.state.errors['passowrd']}</Text>
+
       <Hoshi 
       label="Confirm Password" 
       value={this.state.cpassowrd} 
@@ -115,6 +142,8 @@ class Register extends Component {
       borderHeight={3}
       inputPadding={16}
       />
+      <Text style={styles.error}>{this.state.errors['cpassowrd']}</Text>
+
        <Hoshi 
       label="Telephone" 
       value={this.state.phone} 
@@ -125,6 +154,7 @@ class Register extends Component {
       inputPadding={16}
       style={{marginButtom:45}}
       />
+      <Text style={styles.error}>{this.state.errors['phone']}</Text>
 
      <Button title="Register" onPress={() => this.RegisterUser(this.state)} />
     </View>
