@@ -1,181 +1,101 @@
-import React , {Component} from 'react';
-import {validateAll} from 'indicative/validator';
-import { StyleSheet, Text, View, TextInput,Button } from 'react-native';
-import {Hoshi} from 'react-native-textinput-effects';
-import Axios from  'axios';
-class Register extends Component {
+import React, { Component } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
 
+export default class App extends Component
+{
+    constructor()
+    {
+        super();
 
-  state = {
-    firstname:'',
-    lname:'',
-    uname:'',
-    password:'',
-    cpassword:'',
-    phone:'',
-    userData:'',
-    errors:{}
-  }
-
-
-
-  RegisterUser = async(data) =>{
-
-
-
-    const rules  ={
-
-          firstname:'required|string',
-          lname:'required|string',
-          uname:'required|string',
-          password:'required|string|min:6|confirmed',
-          phone:'required|string'
-
+        this.state = { first_name: '', last_name: '', loading: false, disabled: false }
     }
 
-  const message ={
-         required:(field) => `${field} is required`,
-         'password.confirmed':'the passwords do not match',
-         'password.min':'password is too short'
-   }
+    saveData = () =>
+    {
+        this.setState({ loading: true, disabled: true }, () =>
+        {
+            fetch('http://172.20.10.4/getreq/index.php',
+            {
+                method: 'POST',
+                headers: 
+                {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(
+                {
+                    first_name: this.state.first_name,
 
+                    last_name: this.state.last_name
+                })
 
-     try {
-        // fron end
-        await validateAll(data,rules,message)
+            }).then((response) => response.json()).then((responseJson) =>
+            {
+                alert(responseJson);
+                this.setState({ loading: false, disabled: false });
+            }).catch((error) =>
+            {
+                console.error(error);
+                this.setState({ loading: false, disabled: false });
+            });
+        });
+    }
 
+    render()
+    {
+        return(
+            <View style = { styles.container }>
+                <TextInput underlineColorAndroid = "transparent" placeholder = "Your First Name" style = { styles.textInput } onChangeText = {(text) => this.setState({ first_name: text })}/>
 
-        // back end
-        const response = await Axios.post('https://github.com/aframson/Church-forum-brich-gahana/',{
-               fname:data.firstname,
-               lname:data.lname,
-               uname:data.uname,
-               password:data.password,
-               tele:data.phone
-        })
-  
-        this.setState({
-             userData:response
-        })
+                <TextInput underlineColorAndroid = "transparent" placeholder = "Your Last Name" style = { styles.textInput } onChangeText = {(text) => this.setState({ last_name: text })}/>
 
-     } catch (error) {
-           console.log('---------',error)
+                <TouchableOpacity disabled = { this.state.disabled } activeOpacity = { 0.8 } style = { styles.Btn } onPress = { this.saveData }>
+                    <Text style = { styles.btnText }>Insert</Text>
+                </TouchableOpacity>
 
-           const formattedError = {};
-
-           error.forEach(errors => formattedError[errors.field] = errors.message);
-
-
-           this.setState({
-              errors:formattedError
-           })
-     }
-
-
-  }
-  
-
-
-
-
-
-
-
-
-
-
-  render(){
-   console.log('??????????',this.state.errors)
-  return (
-    <View style={styles.container}>
-      <Text>Refister</Text>
-
-      <Hoshi 
-      label="First name" 
-      value={this.state.firstname} 
-      onChangeText={firstname => this.setState({firstname})} 
-      backgroundColor={"#fff"}
-      borderColor={"#b76c94"}
-      borderHeight={3}
-      inputPadding={16}
-      />
-      <Text style={styles.error}>{this.state.errors['firstname']}</Text>
-       <Hoshi 
-      label="Last Name" 
-      value={this.state.lname} 
-      onChangeText={lname => this.setState({lname})} 
-      backgroundColor={"#fff"}
-      borderColor={"#b76c94"}
-      borderHeight={3}
-      inputPadding={16}
-      />
-      <Text style={styles.error}>{this.state.errors['lname']}</Text>
-
-       <Hoshi 
-      label="User Name" 
-      value={this.state.uname} 
-      onChangeText={uname => this.setState({uname})} 
-      backgroundColor={"#fff"}
-      borderColor={"#b76c94"}
-      borderHeight={3}
-      inputPadding={16}
-      />
-      <Text style={styles.error}>{this.state.errors['uname']}</Text>
-
-       <Hoshi 
-      label="Password" 
-      value={this.state.password} 
-      secureTextEntry
-      onChangeText={password => this.setState({password})} 
-      backgroundColor={"#fff"}
-      borderColor={"#b76c94"}
-      borderHeight={3}
-      inputPadding={16}
-      />
-      <Text style={styles.error}>{this.state.errors['passowrd']}</Text>
-
-      <Hoshi 
-      label="Confirm Password" 
-      value={this.state.cpassowrd} 
-      secureTextEntry
-      onChangeText={cpassowrd => this.setState({cpassowrd})} 
-      backgroundColor={"#fff"}
-      borderColor={"#b76c94"}
-      borderHeight={3}
-      inputPadding={16}
-      />
-      <Text style={styles.error}>{this.state.errors['cpassowrd']}</Text>
-
-       <Hoshi 
-      label="Telephone" 
-      value={this.state.phone} 
-      onChangeText={phone => this.setState({phone})} 
-      backgroundColor={"#fff"}
-      borderColor={"#b76c94"}
-      borderHeight={3}
-      inputPadding={16}
-      style={{marginButtom:45}}
-      />
-      <Text style={styles.error}>{this.state.errors['phone']}</Text>
-
-     <Button title="Register" onPress={() => this.RegisterUser(this.state)} />
-    </View>
-  );
-
-  }
+                {(this.state.loading)?(<ActivityIndicator/>):null}
+                
+            </View>
+        );
+    }
 }
 
-const styles = StyleSheet.create({
-  container: {
-     padding:10
-  },
-  error:{
-    color:'red',
-    padding:5,
-    fontSize:10
+const styles = StyleSheet.create(
+{
+    container:
+    {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#eee',
+        paddingHorizontal: 25,
+        paddingTop: (Platform.OS == 'ios') ? 20 : 0
+    },
 
-  }
+    textInput:
+    {
+        height: 40,
+        borderWidth: 1,
+        borderColor: 'grey',
+        marginVertical: 5,
+        alignSelf: 'stretch',
+        padding: 8,
+        fontSize: 16
+    },
+
+    Btn:
+    {
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        alignSelf: 'stretch',
+        padding: 10,
+        marginTop: 10,
+        marginBottom: 25
+    },
+
+    btnText:
+    {
+        textAlign: 'center',
+        color: 'white',
+        fontSize: 16
+    }
 });
-
-
-export default Register;
